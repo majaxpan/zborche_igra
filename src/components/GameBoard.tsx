@@ -18,35 +18,34 @@ export default function GameBoard() {
   const maxNumColumns = 4; //5 columns
   const maxNumRows = 5; //6 rows
 
-  function updatePosition(){
-    if(currentRow === maxNumRows && currentColumn === maxNumColumns){
-        return;
+  function updatePosition() {
+    if (currentRow === maxNumRows && currentColumn === maxNumColumns) {
+      return;
     }
 
-    if(currentColumn != maxNumColumns){
-        setCurrentColumn(prev => prev + 1);
+    if (currentColumn != maxNumColumns) {
+      setCurrentColumn((prev) => prev + 1);
+    } else {
+      setCurrentColumn(0);
+      setCurrentRow((prev) => prev + 1);
     }
-    else{
-        setCurrentColumn(0);
-        setCurrentRow(prev => prev + 1)
-    }
+  }
+
+  function addLetter(letter) {
+    const newBoard = [...board];
+
+    newBoard[currentRow][currentColumn] = letter;
+
+    updatePosition();
+
+    setBoard(newBoard);
   }
 
   return (
     <div>
-      <button
-        onClick={() => {
-          const newBoard = [...board];
-
-          newBoard[currentRow][currentColumn] = "А";
-
-          updatePosition();
-
-          setBoard(newBoard);
-        }}
-      >
-        Add A
-      </button>
+      <button onClick={() => addLetter("A")} className="border bodred-black flex">Add A</button>
+      <button onClick={() => addLetter("B")} className="border bodred-black flex">Add B</button>
+      <button onClick={() => addLetter("C")} className="border bodred-black flex">Add C</button>
       <div className="flex flex-col gap-1.5">
         {board.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-1.5">
