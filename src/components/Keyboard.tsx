@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export default function Keyboard() {
+export default function Keyboard({onLetterClick}) {
   const macedonianKeyboard = [
     ["Љ", "Њ", "Е", "Р", "Т", "Ѕ", "У", "И", "О", "П", "Ш"],
     ["А", "С", "Д", "Ф", "Г", "Х", "Ј", "К", "Л", "Ч", "Ќ"],
@@ -14,7 +14,7 @@ export default function Keyboard() {
         {macedonianKeyboard.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-1.5">
             {row.map((letter, letterIndex) => (
-              <button onClick={() => console.log(letter)} key={letterIndex} className="w-8 h-12 border border-gray-400">
+              <button onClick={() => onLetterClick(letter)} key={letterIndex} className="w-8 h-12 border border-gray-400">
                 {letter}
               </button>
             ))}
