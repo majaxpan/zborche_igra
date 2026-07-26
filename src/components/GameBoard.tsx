@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export default function GameBoard({board, setBoard, row, tile}) {
+export default function GameBoard({board, row, tile}) {
   return (
     <div>
       <div className="flex flex-col gap-1.5">

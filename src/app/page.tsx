@@ -43,6 +43,30 @@ export default function Home() {
     setBoard(newBoard);
   }
 
+  function removeLetter() {
+    const newBoard = [...board];
+
+    let newRow = currentRow;
+    let newColumn = currentColumn;
+
+    if (currentRow === 0 && currentColumn === 0) {
+      return;
+    }
+
+    if (currentColumn == 0) {
+      newColumn = 4;
+      newRow = currentRow - 1;
+    } else {
+      newColumn = currentColumn - 1;
+    }
+
+    newBoard[newRow][newColumn] = "";
+
+    setBoard(newBoard);
+    setCurrentRow(newRow);
+    setCurrentColumn(newColumn);
+  }
+
   function sendLetter(letter) {
     console.log(letter);
     addLetter(letter);
@@ -52,8 +76,12 @@ export default function Home() {
     <main>
       <h1>Zborche</h1>
 
-      <GameBoard board={board} row={currentRow} tile={currentColumn}/>
+      <GameBoard board={board} row={currentRow} tile={currentColumn} />
       <Keyboard onLetterClick={sendLetter} />
+
+      <button onClick={() => removeLetter()}>
+        Remove
+      </button>
     </main>
   );
 }
