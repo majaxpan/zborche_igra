@@ -20,6 +20,8 @@ export default function Home() {
   const maxNumColumns = 4; //5 columns
   const maxNumRows = 5; //6 rows
 
+  const secretWord = "МАЈКА";
+
   function updatePosition() {
     if (currentRow === maxNumRows && currentColumn === maxNumColumns) {
       return;
@@ -27,7 +29,7 @@ export default function Home() {
 
     if (currentColumn != maxNumColumns) {
       setCurrentColumn((prev) => prev + 1);
-    } 
+    }
     // else {
     //   setCurrentColumn(0);
     //   setCurrentRow((prev) => prev + 1);
@@ -46,7 +48,7 @@ export default function Home() {
 
   function removeLetter() {
     const newBoard = [...board];
-    
+
     let newColumn = currentColumn;
 
     if (currentColumn === 0) {
@@ -62,34 +64,32 @@ export default function Home() {
   }
 
   function submitWord() {
-    // const hasEmptyTile = board[currentRow].some((letter) => {
-    //   if(letter === "") return true;
-    //   else return false;
-    // })
-    const hasEmptyTile = board[currentRow].some(letter => letter === "");
-    if(currentRow === maxNumRows){
+    const hasEmptyTile = board[currentRow].some((letter) => letter === "");
+
+    if (hasEmptyTile) {
+      console.log("Need 5 letters");
       return;
     }
-    if(hasEmptyTile){
-      console.log("Enter was clicked, but the current row has empty tile(s), so must enter 5 letters. Just return.");
-      return;
+
+    const currentWord = board[currentRow].join("");
+
+    if (currentWord === secretWord) {
+      console.log("ПОБЕДА");
+    } else {
+      console.log("ГРЕШЕН ЗБОР. ПРОДОЛЖИ!");
     }
-    else {
-      setCurrentRow((prev) => prev + 1);
-      setCurrentColumn(0);
-      console.log("Enter was clicked. Let's submit the word.");
-    }
-}
+
+    setCurrentRow((prev) => prev + 1);
+    setCurrentColumn(0);
+  }
 
   function handleKeyPress(letter) {
     console.log(letter);
-    if(letter === "⌫"){
+    if (letter === "⌫") {
       removeLetter();
-    }
-    else if(letter === "ENTER"){
+    } else if (letter === "ENTER") {
       submitWord();
-    }
-    else{
+    } else {
       addLetter(letter);
     }
   }
