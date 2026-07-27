@@ -27,10 +27,11 @@ export default function Home() {
 
     if (currentColumn != maxNumColumns) {
       setCurrentColumn((prev) => prev + 1);
-    } else {
-      setCurrentColumn(0);
-      setCurrentRow((prev) => prev + 1);
-    }
+    } 
+    // else {
+    //   setCurrentColumn(0);
+    //   setCurrentRow((prev) => prev + 1);
+    // }
   }
 
   function addLetter(letter) {
@@ -45,32 +46,48 @@ export default function Home() {
 
   function removeLetter() {
     const newBoard = [...board];
-
-    let newRow = currentRow;
+    
     let newColumn = currentColumn;
 
-    if (currentRow === 0 && currentColumn === 0) {
+    if (currentColumn === 0) {
       return;
-    }
-
-    if (currentColumn == 0) {
-      newColumn = 4;
-      newRow = currentRow - 1;
     } else {
       newColumn = currentColumn - 1;
     }
 
-    newBoard[newRow][newColumn] = "";
+    newBoard[currentRow][newColumn] = "";
 
     setBoard(newBoard);
-    setCurrentRow(newRow);
     setCurrentColumn(newColumn);
   }
+
+  function submitWord() {
+    // const hasEmptyTile = board[currentRow].some((letter) => {
+    //   if(letter === "") return true;
+    //   else return false;
+    // })
+    const hasEmptyTile = board[currentRow].some(letter => letter === "");
+    if(currentRow === maxNumRows){
+      return;
+    }
+    if(hasEmptyTile){
+      console.log("Enter was clicked, but the current row has empty tile(s), so must enter 5 letters. Just return.");
+      return;
+    }
+    else {
+      setCurrentRow((prev) => prev + 1);
+      setCurrentColumn(0);
+      console.log("Enter was clicked. Let's submit the word.");
+    }
+}
 
   function handleKeyPress(letter) {
     console.log(letter);
     if(letter === "⌫"){
       removeLetter();
+    }
+    else if(letter === "ENTER"){
+      submitWord();
     }
     else{
       addLetter(letter);
