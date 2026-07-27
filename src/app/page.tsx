@@ -67,9 +67,14 @@ export default function Home() {
     setCurrentColumn(newColumn);
   }
 
-  function sendLetter(letter) {
+  function handleKeyPress(letter) {
     console.log(letter);
-    addLetter(letter);
+    if(letter === "⌫"){
+      removeLetter();
+    }
+    else{
+      addLetter(letter);
+    }
   }
 
   return (
@@ -77,11 +82,7 @@ export default function Home() {
       <h1>Zborche</h1>
 
       <GameBoard board={board} row={currentRow} tile={currentColumn} />
-      <Keyboard onLetterClick={sendLetter} />
-
-      <button onClick={() => removeLetter()}>
-        Remove
-      </button>
+      <Keyboard onKeyPress={handleKeyPress} />
     </main>
   );
 }
