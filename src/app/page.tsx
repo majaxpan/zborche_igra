@@ -1,10 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
 
 export default function Home() {
   const [board, setBoard] = useState([
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+  ]);
+
+  const [colors, setColors] = useState([
     ["", "", "", "", ""],
     ["", "", "", "", ""],
     ["", "", "", "", ""],
@@ -21,6 +30,9 @@ export default function Home() {
   const maxNumRows = 5; //6 rows
 
   const secretWord = "МАЈКА";
+
+  const [submittedWords, setSubmittedWords] = useState([]);
+  const [submittedRows, setSubmittedRows] = useState([]);
 
   function updatePosition() {
     if (currentRow === maxNumRows && currentColumn === maxNumColumns) {
@@ -72,12 +84,27 @@ export default function Home() {
     }
 
     const currentWord = board[currentRow].join("");
+    addSubmittedWords(currentWord);
+    setSubmittedRows(prev => [...prev, currentRow]);
+    // if (currentWord === secretWord) {
+    //   console.log("ПОБЕДА");
+    // } else {
+    //   console.log("ГРЕШЕН ЗБОР. ПРОДОЛЖИ!");
+    // }
 
-    if (currentWord === secretWord) {
-      console.log("ПОБЕДА");
-    } else {
-      console.log("ГРЕШЕН ЗБОР. ПРОДОЛЖИ!");
+    const newColors = colors.map((row) => {
+      return [...row];
+    });
+
+    for(let i=0; i<=maxNumColumns; i++){
+      if(currentWord[i]===secretWord[i]){
+        newColors[currentRow][i]='GREEN'
+      }
+      else{
+        newColors[currentRow][i]='GRAY'
+      }
     }
+    setColors(newColors);
 
     setCurrentRow((prev) => prev + 1);
     setCurrentColumn(0);
@@ -94,11 +121,27 @@ export default function Home() {
     }
   }
 
+  function addSubmittedWords(word) {
+    setSubmittedWords((prev) => [...prev, word]);
+  }
+
+  useEffect(() => {
+    console.log(submittedWords);
+  }, [submittedWords]);
+
+  useEffect(() => {
+    console.log(submittedRows);
+  }, [submittedRows]);
+
+  useEffect(() => {
+    console.log(colors);
+  }, [colors]);
+
   return (
     <main>
-      <h1>Zborche</h1>
+      <h1>ЗБОРЧЕ</h1>
 
-      <GameBoard board={board} row={currentRow} tile={currentColumn} />
+      <GameBoard board={board} colors={colors} row={currentRow} tile={currentColumn} />
       <Keyboard onKeyPress={handleKeyPress} />
     </main>
   );
