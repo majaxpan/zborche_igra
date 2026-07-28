@@ -85,7 +85,7 @@ export default function Home() {
 
     const currentWord = board[currentRow].join("");
     addSubmittedWords(currentWord);
-    setSubmittedRows(prev => [...prev, currentRow]);
+    setSubmittedRows((prev) => [...prev, currentRow]);
     // if (currentWord === secretWord) {
     //   console.log("ПОБЕДА");
     // } else {
@@ -96,12 +96,22 @@ export default function Home() {
       return [...row];
     });
 
-    for(let i=0; i<=maxNumColumns; i++){
-      if(currentWord[i]===secretWord[i]){
-        newColors[currentRow][i]='GREEN'
-      }
-      else{
-        newColors[currentRow][i]='GRAY'
+    for (let i = 0; i <= maxNumColumns; i++) {
+      if (currentWord[i] === secretWord[i]) {
+        newColors[currentRow][i] = "GREEN";
+      } else {
+        let found = false;
+
+        for (let k = 0; k <= maxNumColumns; k++) {
+          if (currentWord[i] === secretWord[k] && newColors[currentRow][k] != "GREEN") {
+            found = true;
+          }
+        }
+        if (found) {
+          newColors[currentRow][i] = "YELLOW";
+        } else {
+          newColors[currentRow][i] = "GRAY";
+        }
       }
     }
     setColors(newColors);
@@ -141,7 +151,12 @@ export default function Home() {
     <main>
       <h1>ЗБОРЧЕ</h1>
 
-      <GameBoard board={board} colors={colors} row={currentRow} tile={currentColumn} />
+      <GameBoard
+        board={board}
+        colors={colors}
+        row={currentRow}
+        tile={currentColumn}
+      />
       <Keyboard onKeyPress={handleKeyPress} />
     </main>
   );
