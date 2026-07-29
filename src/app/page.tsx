@@ -29,10 +29,15 @@ export default function Home() {
   const maxNumColumns = 4; //5 columns
   const maxNumRows = 5; //6 rows
 
-  const secretWord = "МАЈКА";
+  const secretWord = "КУЌАА";
 
   const [submittedWords, setSubmittedWords] = useState([]);
   const [submittedRows, setSubmittedRows] = useState([]);
+
+  //const used = [false, false, false, false, false];
+  const used = Array(secretWord.length).fill(false);
+
+  const [gameStatus, setGameStatus] = useState("PLAYING");
 
   function updatePosition() {
     if (currentRow === maxNumRows && currentColumn === maxNumColumns) {
@@ -86,41 +91,80 @@ export default function Home() {
     const currentWord = board[currentRow].join("");
     addSubmittedWords(currentWord);
     setSubmittedRows((prev) => [...prev, currentRow]);
-    // if (currentWord === secretWord) {
-    //   console.log("ПОБЕДА");
-    // } else {
-    //   console.log("ГРЕШЕН ЗБОР. ПРОДОЛЖИ!");
-    // }
+    if (currentWord === secretWord) {
+      console.log("ПОБЕДА");
+      setGameStatus("WON");
+    } else {
+      if (currentRow === maxNumRows) {
+        setGameStatus("LOST");
+      } else {
+        console.log("ГРЕШЕН ЗБОР. ПРОДОЛЖИ!");
+      }
+    }
 
     const newColors = colors.map((row) => {
       return [...row];
     });
 
+    // for (let i = 0; i <= maxNumColumns; i++) {
+    //   if (currentWord[i] === secretWord[i]) {
+    //     newColors[currentRow][i] = "GREEN";
+    //     used[i]=true;
+    //     console.log(used);
+    //   } else {
+    //     let found = false;
+
+    //     for (let k = 0; k <= maxNumColumns; k++) {
+    //       if (currentWord[i] === secretWord[k] && used[k] === false) {
+    //         found = true;
+    //         used[k] = true;
+    //         break;
+    //       }
+    //     }
+    //     if (found) {
+    //       newColors[currentRow][i] = "YELLOW";
+    //     } else {
+    //       newColors[currentRow][i] = "GRAY";
+    //     }
+    //   }
+    // }
     for (let i = 0; i <= maxNumColumns; i++) {
       if (currentWord[i] === secretWord[i]) {
         newColors[currentRow][i] = "GREEN";
-      } else {
-        let found = false;
-
-        for (let k = 0; k <= maxNumColumns; k++) {
-          if (currentWord[i] === secretWord[k] && newColors[currentRow][k] != "GREEN") {
-            found = true;
-          }
-        }
-        if (found) {
-          newColors[currentRow][i] = "YELLOW";
-        } else {
-          newColors[currentRow][i] = "GRAY";
-        }
+        used[i] = true;
+        console.log(used);
       }
     }
+
+    for (let i = 0; i <= maxNumColumns; i++) {
+      if(used[i]===true) continue;
+      let found = false;
+      for (let k = 0; k <= maxNumColumns; k++) {
+        if (used[k] === false && currentWord[i] === secretWord[k]) {
+          found = true;
+          used[k] = true;
+          break;
+        }
+      }
+      if (found) {
+        newColors[currentRow][i] = "YELLOW";
+      } else {
+        newColors[currentRow][i] = "GRAY";
+      }
+    }
+
     setColors(newColors);
 
-    setCurrentRow((prev) => prev + 1);
-    setCurrentColumn(0);
+    if (currentWord != secretWord) {
+      setCurrentRow((prev) => prev + 1);
+      setCurrentColumn(0);
+    }
   }
 
   function handleKeyPress(letter) {
+    if (gameStatus !== "PLAYING") {
+      return;
+    }
     console.log(letter);
     if (letter === "⌫") {
       removeLetter();
@@ -146,6 +190,10 @@ export default function Home() {
   useEffect(() => {
     console.log(colors);
   }, [colors]);
+
+  useEffect(() => {
+    console.log(gameStatus);
+  }, [gameStatus]);
 
   return (
     <main>
