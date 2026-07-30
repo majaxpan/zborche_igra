@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
+import { checkWord } from "@/utils/wordChecker";
 
 export default function Home() {
   const [board, setBoard] = useState([
@@ -33,9 +34,6 @@ export default function Home() {
 
   const [submittedWords, setSubmittedWords] = useState([]);
   const [submittedRows, setSubmittedRows] = useState([]);
-
-  //const used = [false, false, false, false, false];
-  const used = Array(secretWord.length).fill(false);
 
   const [gameStatus, setGameStatus] = useState("PLAYING");
 
@@ -102,56 +100,13 @@ export default function Home() {
       }
     }
 
+    const resultColors = checkWord(currentWord, secretWord);
+
     const newColors = colors.map((row) => {
       return [...row];
     });
 
-    // for (let i = 0; i <= maxNumColumns; i++) {
-    //   if (currentWord[i] === secretWord[i]) {
-    //     newColors[currentRow][i] = "GREEN";
-    //     used[i]=true;
-    //     console.log(used);
-    //   } else {
-    //     let found = false;
-
-    //     for (let k = 0; k <= maxNumColumns; k++) {
-    //       if (currentWord[i] === secretWord[k] && used[k] === false) {
-    //         found = true;
-    //         used[k] = true;
-    //         break;
-    //       }
-    //     }
-    //     if (found) {
-    //       newColors[currentRow][i] = "YELLOW";
-    //     } else {
-    //       newColors[currentRow][i] = "GRAY";
-    //     }
-    //   }
-    // }
-    for (let i = 0; i <= maxNumColumns; i++) {
-      if (currentWord[i] === secretWord[i]) {
-        newColors[currentRow][i] = "GREEN";
-        used[i] = true;
-        console.log(used);
-      }
-    }
-
-    for (let i = 0; i <= maxNumColumns; i++) {
-      if(used[i]===true) continue;
-      let found = false;
-      for (let k = 0; k <= maxNumColumns; k++) {
-        if (used[k] === false && currentWord[i] === secretWord[k]) {
-          found = true;
-          used[k] = true;
-          break;
-        }
-      }
-      if (found) {
-        newColors[currentRow][i] = "YELLOW";
-      } else {
-        newColors[currentRow][i] = "GRAY";
-      }
-    }
+    newColors[currentRow] = resultColors;
 
     setColors(newColors);
 
