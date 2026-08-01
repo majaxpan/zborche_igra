@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { checkWord } from "@/utils/wordChecker";
+import { selectRandomWord } from "@/utils/selectRandomWord";
 
-export function useZborcheGame(secretWord) {
+export function useZborcheGame() {
   const [board, setBoard] = useState([
     ["", "", "", "", ""],
     ["", "", "", "", ""],
@@ -24,6 +25,12 @@ export function useZborcheGame(secretWord) {
   const [currentRow, setCurrentRow] = useState(0);
 
   const [gameStatus, setGameStatus] = useState("PLAYING");
+
+  const [secretWord, setSecretWord] = useState(null);
+
+  useEffect(() => {
+    setSecretWord(selectRandomWord());
+  }, []);
 
   const WORD_LENGTH = 5;
   const MAX_ATTEMPTS = 6;
@@ -118,5 +125,6 @@ export function useZborcheGame(secretWord) {
     currentColumn,
     gameStatus,
     handleKeyPress,
+    secretWord,
   };
 }
