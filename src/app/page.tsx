@@ -16,6 +16,7 @@ export default function Home() {
     handleKeyPress,
     secretWord,
     invalidSubmitAttempt,
+    keyboardColors,
   } = useZborcheGame();
 
   const [isModalOpen, setIsModalOpen] = useState(true);
@@ -36,7 +37,9 @@ export default function Home() {
         tile={currentColumn}
         invalidSubmitAttempt={invalidSubmitAttempt}
       />
-      <Keyboard onKeyPress={handleKeyPress} />
+      <Keyboard 
+        keyboardColors={keyboardColors} 
+        onKeyPress={handleKeyPress} />
 
       <EndGameModal
         gameStatus={gameStatus}

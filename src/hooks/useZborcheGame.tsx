@@ -24,6 +24,8 @@ export function useZborcheGame() {
     ["", "", "", "", ""],
   ]);
 
+  const [keyboardColors, setKeyboardColors] = useState({});
+
   const [currentColumn, setCurrentColumn] = useState(0);
   const [currentRow, setCurrentRow] = useState(0);
 
@@ -100,6 +102,28 @@ export function useZborcheGame() {
 
     const resultColors = checkWord(currentWord, secretWord);
 
+    const newKeyboardColors = { ...keyboardColors };
+    for (let i = 0; i < WORD_LENGTH; i++) {
+      const existingColor = keyboardColors[currentWord[i]];
+      const newColor = resultColors[i];
+
+      if(existingColor === "GREEN"){
+        continue;
+      }
+
+      if(existingColor === "YELLOW" && newColor==="GRAY"){
+        continue;
+      }
+
+      newKeyboardColors[currentWord[i]] = newColor;
+
+      // setKeyboardColors((prev) => ({
+      //   ...prev,
+      //   [currentWord[i]]: finalColor,
+      // }));
+    }
+    setKeyboardColors(newKeyboardColors);
+
     const newColors = colors.map((row) => {
       return [...row];
     });
@@ -135,6 +159,7 @@ export function useZborcheGame() {
     gameStatus,
     handleKeyPress,
     secretWord,
-    invalidSubmitAttempt
+    invalidSubmitAttempt,
+    keyboardColors,
   };
 }

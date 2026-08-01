@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export default function Keyboard({onKeyPress}) {
+export default function Keyboard({keyboardColors, onKeyPress}) {
   const macedonianKeyboard = [
     ["Љ", "Њ", "Е", "Р", "Т", "Ѕ", "У", "И", "О", "П", "Ш"],
     ["А", "С", "Д", "Ф", "Г", "Х", "Ј", "К", "Л", "Ч", "Ќ"],
