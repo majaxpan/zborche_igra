@@ -41,6 +41,8 @@ export function useZborcheGame() {
   const LAST_LETTER_INDEX = WORD_LENGTH - 1;
   const LAST_ROW_INDEX = MAX_ATTEMPTS - 1;
 
+  const [invalidSubmitAttempt, setInvalidSubmitAttempt] = useState(0);
+
   function updatePosition() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
   }
@@ -84,7 +86,7 @@ export function useZborcheGame() {
 
     const currentWord = board[currentRow].join("");
     if (!isValidWord(currentWord)) {
-      console.log("Нема таков збор!");
+      setInvalidSubmitAttempt((prev) => prev + 1);
       return;
     }
     if (currentWord === secretWord) {
@@ -133,5 +135,6 @@ export function useZborcheGame() {
     gameStatus,
     handleKeyPress,
     secretWord,
+    invalidSubmitAttempt
   };
 }
