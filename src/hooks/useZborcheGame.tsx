@@ -81,16 +81,13 @@ export function useZborcheGame() {
 
   function submitWord() {
     const hasEmptyTile = board[currentRow].some((letter) => letter === "");
-
-    if (hasEmptyTile) {
-      return;
-    }
-
     const currentWord = board[currentRow].join("");
-    if (!isValidWord(currentWord)) {
+
+    if (hasEmptyTile || !isValidWord(currentWord)) {
       setInvalidSubmitAttempt((prev) => prev + 1);
       return;
     }
+
     if (currentWord === secretWord) {
       setGameStatus("WON");
     } else {
@@ -104,7 +101,7 @@ export function useZborcheGame() {
 
     const newKeyboardColors = { ...keyboardColors };
     for (let i = 0; i < WORD_LENGTH; i++) {
-      const existingColor = keyboardColors[currentWord[i]];
+      const existingColor = newKeyboardColors[currentWord[i]];
       const newColor = resultColors[i];
 
       if(existingColor === "GREEN"){
@@ -117,10 +114,6 @@ export function useZborcheGame() {
 
       newKeyboardColors[currentWord[i]] = newColor;
 
-      // setKeyboardColors((prev) => ({
-      //   ...prev,
-      //   [currentWord[i]]: finalColor,
-      // }));
     }
     setKeyboardColors(newKeyboardColors);
 
