@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { checkWord } from "@/utils/wordChecker";
+
 import { selectRandomWord } from "@/utils/selectRandomWord";
+
+import { checkWord } from "@/utils/wordChecker";
+import { isValidWord } from "@/utils/wordValidator";
 
 export function useZborcheGame() {
   const [board, setBoard] = useState([
@@ -80,6 +83,10 @@ export function useZborcheGame() {
     }
 
     const currentWord = board[currentRow].join("");
+    if (!isValidWord(currentWord)) {
+      console.log("Нема таков збор!");
+      return;
+    }
     if (currentWord === secretWord) {
       setGameStatus("WON");
     } else {
