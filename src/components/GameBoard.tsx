@@ -1,12 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
-function getColor(color) {
-  if (color === "GREEN") return "bg-green-400";
-  if (color === "GRAY") return "bg-gray-300";
-  if (color === "YELLOW") return "bg-yellow-200";
-  return "bg-white";
-}
+import { getColor } from "@/utils/getColor";
 
 export default function GameBoard({
   board,
@@ -16,6 +10,7 @@ export default function GameBoard({
   invalidSubmitAttempt,
 }) {
   const [isShaking, setIsShaking] = useState(false);
+  const [revealedTiles, setRevealedTiles] = useState([]);
 
   useEffect(() => {
     console.log("invalid attempt:", invalidSubmitAttempt);
@@ -26,20 +21,64 @@ export default function GameBoard({
     }, 500);
   }, [invalidSubmitAttempt]);
 
+  useEffect(() => {
+    if (row === 0 && !colors[0].some((color) => color !== "")) {
+      return;
+    }
+
+    const submittedRow = row > 0 ? row - 1 : 0;
+
+    colors[submittedRow].forEach((color, tileIndex) => {
+      if (!color) return;
+
+      setTimeout(
+        () => {
+          setRevealedTiles((prev) => [...prev, `${submittedRow}-${tileIndex}`]);
+        },
+        tileIndex * 150 + 300,
+      );
+    });
+  }, [colors]);
+
   return (
     <div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2 sm:gap-2 md:gap-3 lg:gap-4">
         {board.map((boardRow, rowIndex) => (
-          <div key={rowIndex} className={`flex gap-1.5 ${
-          rowIndex === row && isShaking ? "shake" : ""}`}>
-            {boardRow.map((tile, tileIndex) => (
-              <div
-                key={tileIndex}
-                className={`w-12 h-12 border border-gray-400 ${getColor(colors[rowIndex][tileIndex])}`}
-              >
-                {tile}
-              </div>
-            ))}
+          <div
+            key={rowIndex}
+            className={`flex gap-2 sm:gap-2 md:gap-3 lg:gap-4 ${
+              rowIndex === row && isShaking ? "shake" : ""
+            }`}
+          >
+            {boardRow.map((tile, tileIndex) => {
+              const color = colors[rowIndex][tileIndex];
+
+              return (
+                <div
+                  key={tileIndex}
+                  className={`
+                    w-10 h-10
+                    sm:w-12 sm:h-12
+                    md:w-14 md:h-14
+                    lg:w-15 lg:h-15
+                    text-10 text-m md:text-xl lg:text-2xl
+                    border border-gray-400
+                    flex items-center justify-center
+                    ${
+                      revealedTiles.includes(`${rowIndex}-${tileIndex}`)
+                        ? getColor(color)
+                        : "bg-white"
+                    }
+                    ${color ? "flip" : ""}
+                  `}
+                  style={{
+                    animationDelay: `${tileIndex * 0.15}s`,
+                  }}
+                >
+                  {tile}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>

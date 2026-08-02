@@ -26,9 +26,8 @@ export default function Home() {
   }
 
   return (
-    <main>
-      <h1>ЗБОРЧЕ</h1>
-      <h2>{secretWord}</h2>
+    <main className="min-h-screen w-full flex flex-col items-center justify-center gap-5 px-2">
+      <h1 className="text-2xl font-bold tracking-wider text-black">ЗБОРЧЕ</h1>
 
       <GameBoard
         board={board}

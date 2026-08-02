@@ -137,7 +137,7 @@ export function useZborcheGame() {
     }
     if (letter === "⌫") {
       removeLetter();
-    } else if (letter === "ENTER") {
+    } else if (letter === "⏎") {
       submitWord();
     } else {
       addLetter(letter);
