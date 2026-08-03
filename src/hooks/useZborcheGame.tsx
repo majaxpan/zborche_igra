@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { selectRandomWord } from "@/utils/selectRandomWord";
 
@@ -104,16 +104,15 @@ export function useZborcheGame() {
       const existingColor = newKeyboardColors[currentWord[i]];
       const newColor = resultColors[i];
 
-      if(existingColor === "GREEN"){
+      if (existingColor === "GREEN") {
         continue;
       }
 
-      if(existingColor === "YELLOW" && newColor==="GRAY"){
+      if (existingColor === "YELLOW" && newColor === "GRAY") {
         continue;
       }
 
       newKeyboardColors[currentWord[i]] = newColor;
-
     }
     setKeyboardColors(newKeyboardColors);
 
@@ -143,6 +142,57 @@ export function useZborcheGame() {
       addLetter(letter);
     }
   }
+
+  const gameState = {
+    board: board,
+    colors: colors,
+    keyboardColors: keyboardColors,
+    currentRow: currentRow,
+    currentColumn: currentColumn,
+    gameStatus: gameStatus,
+    date: new Date().toDateString(),
+  };
+
+  const hasLoaded = useRef(false);
+
+  function saveGameState() {
+    //let newGameState = JSON.stringify(gameState);
+    //localStorage.setItem("zborche-game", newGameState);
+
+    //localStorage.setItem("zborche-game", JSON.stringify(gameState));
+
+    if(hasLoaded.current){
+      localStorage.setItem("zborche-game", JSON.stringify(gameState));
+    }
+  }
+
+  function loadGameState() {
+    const savedGame = localStorage.getItem("zborche-game");
+
+    if (savedGame !== null) {
+      const parsedGame = JSON.parse(savedGame);
+      const today = new Date().toDateString()
+
+      if(parsedGame.date === today){
+        //restore
+      setBoard(parsedGame.board);
+      setColors(parsedGame.colors);
+      setKeyboardColors(parsedGame.keyboardColors);
+      setCurrentRow(parsedGame.currentRow);
+      setCurrentColumn(parsedGame.currentColumn);
+      setGameStatus(parsedGame.gameStatus);
+      }
+    }
+  }
+
+  useEffect(() => {
+    saveGameState();
+  }, [board, colors, keyboardColors, currentRow, currentColumn, gameStatus]);
+
+  useEffect(() => {
+    loadGameState();
+    hasLoaded.current = true;
+  }, []);
 
   return {
     board,
