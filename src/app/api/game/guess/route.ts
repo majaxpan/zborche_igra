@@ -1,4 +1,6 @@
 import { pool } from "@/lib/db";
+import { checkWord } from "@/lib/gameLogic";
+
 
 export async function POST(request) {
     const body = await request.json();
@@ -24,21 +26,27 @@ export async function POST(request) {
         `SELECT dg.word_id, w.word
         FROM daily_games AS dg
         JOIN words AS w
-            ON w.id = dg.word_id
+        ON w.id = dg.word_id
         WHERE dg.date = $1`,
         [today]
     );
 
-    const guessedWordId = result.rows[0].id;
-    const secretWordId = secretResult.rows[0].word_id;
+    const secretWord = secretResult.rows[0].word;
+    const secredWordId = secretResult.rows[0].word_id;
+    const wordGuessId = result.rows[0].id;
 
-    if (guessedWordId === secretWordId) {
+
+    if(secredWordId === wordGuessId){
         return Response.json({
             result: "CORRECT",
+            colors: ["GREEN", "GREEN", "GREEN", "GREEN", "GREEN"],
         });
     }
-
-    return Response.json({
-        result: "INCORRECT",
-    });
+    else{
+        const colors = checkWord(wordGuess, secretWord);
+        return Response.json({
+            result: "INCORRECT",
+            colors: colors,
+        });
+    }
 }
