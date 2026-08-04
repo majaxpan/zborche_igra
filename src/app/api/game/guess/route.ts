@@ -5,6 +5,7 @@ import { checkWord } from "@/lib/gameLogic";
 export async function POST(request) {
     const body = await request.json();
     const wordGuess = body.guess;
+    const attempt = body.attempt;
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -35,15 +36,22 @@ export async function POST(request) {
     const secredWordId = secretResult.rows[0].word_id;
     const wordGuessId = result.rows[0].id;
 
-
-    if(secredWordId === wordGuessId){
+    if (secredWordId === wordGuessId) {
         return Response.json({
             result: "CORRECT",
             colors: ["GREEN", "GREEN", "GREEN", "GREEN", "GREEN"],
         });
     }
-    else{
+    else {
         const colors = checkWord(wordGuess, secretWord);
+        if (attempt === 5) {
+            return Response.json({
+                result: "LOST",
+                colors: colors,
+                secretWord: secretWord,
+            });
+        }
+
         return Response.json({
             result: "INCORRECT",
             colors: colors,

@@ -21,10 +21,6 @@ export default function Home() {
 
   const [isModalOpen, setIsModalOpen] = useState(true);
 
-  if (!secretWord) {
-    return <div>Се вчитува...</div>;
-  }
-
   return (
     <main className="min-h-screen w-full flex flex-col items-center justify-center gap-5 px-2">
       <h1 className="text-2xl font-bold tracking-wider text-black">ЗБОРЧЕ</h1>

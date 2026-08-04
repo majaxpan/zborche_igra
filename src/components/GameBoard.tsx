@@ -12,6 +12,10 @@ export default function GameBoard({
   const [isShaking, setIsShaking] = useState(false);
   const [revealedTiles, setRevealedTiles] = useState([]);
 
+  const submittedRow = colors.findLastIndex((row) =>
+    row.some((color) => color !== ""),
+  );
+
   useEffect(() => {
     console.log("invalid attempt:", invalidSubmitAttempt);
     setIsShaking(true);
@@ -22,11 +26,13 @@ export default function GameBoard({
   }, [invalidSubmitAttempt]);
 
   useEffect(() => {
-    if (row === 0 && !colors[0].some((color) => color !== "")) {
+    const submittedRow = colors.findLastIndex((row) =>
+      row.some((color) => color !== ""),
+    );
+
+    if (submittedRow === -1) {
       return;
     }
-
-    const submittedRow = row > 0 ? row - 1 : 0;
 
     colors[submittedRow].forEach((color, tileIndex) => {
       if (!color) return;

@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-import { selectRandomWord } from "@/utils/selectRandomWord";
-
-import { checkWord } from "@/utils/wordChecker";
-import { isValidWord } from "@/utils/wordValidator";
+//import { isSaneGuess } from "@/utils/wordValidator";
 
 export function useZborcheGame() {
   const [board, setBoard] = useState([
@@ -32,10 +29,6 @@ export function useZborcheGame() {
   const [gameStatus, setGameStatus] = useState("PLAYING");
 
   const [secretWord, setSecretWord] = useState(null);
-
-  useEffect(() => {
-    setSecretWord(selectRandomWord());
-  }, []);
 
   const WORD_LENGTH = 5;
   const MAX_ATTEMPTS = 6;
@@ -79,27 +72,51 @@ export function useZborcheGame() {
     setCurrentColumn(newColumn);
   }
 
-  function submitWord() {
+  async function submitWord() {
     const hasEmptyTile = board[currentRow].some((letter) => letter === "");
     const currentWord = board[currentRow].join("");
 
-    if (hasEmptyTile || !isValidWord(currentWord)) {
+    // if (hasEmptyTile || !isSaneGuess(currentWord)) {
+    //   setInvalidSubmitAttempt((prev) => prev + 1);
+    //   return;
+    // }
+
+    if (hasEmptyTile) {
       setInvalidSubmitAttempt((prev) => prev + 1);
       return;
     }
 
-    if (currentWord === secretWord) {
-      setGameStatus("WON");
-    } else {
-      if (currentRow === LAST_ROW_INDEX) {
-        setGameStatus("LOST");
-      } else {
-      }
+    const response = await fetch("/api/game/guess", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guess: currentWord,
+        attempt: currentRow,
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    if (data.result === "INVALID_WORD") {
+      setInvalidSubmitAttempt((prev) => prev + 1);
+      return;
     }
 
-    const resultColors = checkWord(currentWord, secretWord);
+    if (data.result === "CORRECT") {
+      setGameStatus("WON");
+    } else if (data.result === "LOST") {
+      setSecretWord(data.secretWord);
+      setGameStatus("LOST");
+    }
+
+    const resultColors = data.colors;
 
     const newKeyboardColors = { ...keyboardColors };
+
     for (let i = 0; i < WORD_LENGTH; i++) {
       const existingColor = newKeyboardColors[currentWord[i]];
       const newColor = resultColors[i];
@@ -124,7 +141,7 @@ export function useZborcheGame() {
 
     setColors(newColors);
 
-    if (currentWord != secretWord) {
+    if (data.result === "INCORRECT") {
       setCurrentRow((prev) => prev + 1);
       setCurrentColumn(0);
     }
@@ -161,7 +178,7 @@ export function useZborcheGame() {
 
     //localStorage.setItem("zborche-game", JSON.stringify(gameState));
 
-    if(hasLoaded.current){
+    if (hasLoaded.current) {
       localStorage.setItem("zborche-game", JSON.stringify(gameState));
     }
   }
@@ -171,16 +188,16 @@ export function useZborcheGame() {
 
     if (savedGame !== null) {
       const parsedGame = JSON.parse(savedGame);
-      const today = new Date().toDateString()
+      const today = new Date().toDateString();
 
-      if(parsedGame.date === today){
+      if (parsedGame.date === today) {
         //restore
-      setBoard(parsedGame.board);
-      setColors(parsedGame.colors);
-      setKeyboardColors(parsedGame.keyboardColors);
-      setCurrentRow(parsedGame.currentRow);
-      setCurrentColumn(parsedGame.currentColumn);
-      setGameStatus(parsedGame.gameStatus);
+        setBoard(parsedGame.board);
+        setColors(parsedGame.colors);
+        setKeyboardColors(parsedGame.keyboardColors);
+        setCurrentRow(parsedGame.currentRow);
+        setCurrentColumn(parsedGame.currentColumn);
+        setGameStatus(parsedGame.gameStatus);
       }
     }
   }
