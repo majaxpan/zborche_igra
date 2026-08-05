@@ -95,7 +95,6 @@ export function useZborcheGame() {
       },
       body: JSON.stringify({
         guess: currentWord,
-        attempt: currentRow,
         gameId,
       }),
     });

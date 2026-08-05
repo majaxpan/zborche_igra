@@ -1,7 +1,35 @@
 import { pool } from "@/lib/db";
+import { randomUUID } from "crypto";
+import { cookies } from "next/headers";
 
 export async function GET() {
     const today = new Date().toISOString().slice(0, 10);
+
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get("sessionId")?.value;
+
+    const sessionExists = await pool.query(`
+        select id 
+        from sessions
+        where id=$1
+        `, [sessionId])
+
+    if(sessionId && sessionExists.rows.length > 0){
+        await pool.query(`
+            update sessions
+            set last_seen_at= now()
+            where id=$1
+            `, [sessionId])
+    }
+    else{
+        const newSessionId = randomUUID();
+        cookieStore.set("sessionId", newSessionId);
+
+        await pool.query(`
+            insert into sessions(id)
+            values($1)
+            `, [newSessionId])
+    }
 
     const result = await pool.query(
         `SELECT id
