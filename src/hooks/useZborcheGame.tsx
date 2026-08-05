@@ -38,6 +38,8 @@ export function useZborcheGame() {
 
   const [invalidSubmitAttempt, setInvalidSubmitAttempt] = useState(0);
 
+  const [gameId, setGameId] = useState(null);
+
   function updatePosition() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
   }
@@ -94,6 +96,7 @@ export function useZborcheGame() {
       body: JSON.stringify({
         guess: currentWord,
         attempt: currentRow,
+        gameId,
       }),
     });
 
@@ -217,6 +220,7 @@ export function useZborcheGame() {
       const data = await response.json();
 
       console.log("Today's game:", data);
+      setGameId(data.gameId);
     }
 
     loadTodayGame();

@@ -6,8 +6,7 @@ export async function POST(request) {
     const body = await request.json();
     const wordGuess = body.guess;
     const attempt = body.attempt;
-
-    const today = new Date().toISOString().slice(0, 10);
+    const gameId =body.gameId;
 
     // Does the word exist in the guess list?
     const result = await pool.query(
@@ -28,8 +27,8 @@ export async function POST(request) {
         FROM daily_games AS dg
         JOIN words AS w
         ON w.id = dg.word_id
-        WHERE dg.date = $1`,
-        [today]
+        WHERE dg.id = $1`,
+        [gameId]
     );
 
     const secretWord = secretResult.rows[0].word;
