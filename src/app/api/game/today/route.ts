@@ -23,7 +23,7 @@ export async function GET() {
             limit 1`,
         )
 
-        if(wordResult.rows.length === 0){
+        if (wordResult.rows.length === 0) {
             const fallbackWordResult = await pool.query(
                 `select w.id
                 from words as w
@@ -34,10 +34,10 @@ export async function GET() {
                 limit 1
                 `
             )
-            
+
             wordId = fallbackWordResult.rows[0].id
 
-        } else{
+        } else {
             wordId = wordResult.rows[0].id
         }
 
@@ -51,7 +51,15 @@ export async function GET() {
         console.log(gameresult);
     }
 
+    const gameResult = await pool.query(
+        `SELECT id
+     FROM daily_games
+     WHERE date = $1`,
+        [today]
+    );
+
     return Response.json({
         date: today,
+        gameId: gameResult.rows[0].id,
     });
 }

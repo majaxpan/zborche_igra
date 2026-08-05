@@ -211,6 +211,17 @@ export function useZborcheGame() {
     hasLoaded.current = true;
   }, []);
 
+  useEffect(() => {
+    async function loadTodayGame() {
+      const response = await fetch("/api/game/today");
+      const data = await response.json();
+
+      console.log("Today's game:", data);
+    }
+
+    loadTodayGame();
+  }, []);
+
   return {
     board,
     colors,
