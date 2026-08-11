@@ -39,6 +39,7 @@ export function useZborcheGame() {
   const [invalidSubmitAttempt, setInvalidSubmitAttempt] = useState(0);
 
   const [gameId, setGameId] = useState(null);
+  const [gameReady, setGameReady] = useState(false);
 
   function updatePosition() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
@@ -75,6 +76,10 @@ export function useZborcheGame() {
   }
 
   async function submitWord() {
+    if (!gameReady || gameId === null) {
+      return;
+    }
+
     const hasEmptyTile = board[currentRow].some((letter) => letter === "");
     const currentWord = board[currentRow].join("");
 
@@ -101,7 +106,9 @@ export function useZborcheGame() {
 
     const data = await response.json();
 
-    console.log(data);
+    console.log("GUESS RESPONSE:", data);
+
+    console.log("History:", data.history);
 
     if (data.result === "INVALID_WORD") {
       setInvalidSubmitAttempt((prev) => prev + 1);
@@ -219,7 +226,26 @@ export function useZborcheGame() {
       const data = await response.json();
 
       console.log("Today's game:", data);
+
+      const newBoard = [
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+      ];
+
+      data.history.forEach((historyEntry) => {
+        const rowIndex = historyEntry.attempt - 1;
+
+        newBoard[rowIndex] = historyEntry.word.split("");
+      });
+
+      setBoard(newBoard);
+
       setGameId(data.gameId);
+      setGameReady(true);
     }
 
     loadTodayGame();

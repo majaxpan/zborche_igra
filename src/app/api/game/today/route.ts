@@ -14,14 +14,14 @@ export async function GET() {
         where id=$1
         `, [sessionId])
 
-    if(sessionId && sessionExists.rows.length > 0){
+    if (sessionId && sessionExists.rows.length > 0) {
         await pool.query(`
             update sessions
             set last_seen_at= now()
             where id=$1
             `, [sessionId])
     }
-    else{
+    else {
         const newSessionId = randomUUID();
         cookieStore.set("sessionId", newSessionId);
 
@@ -86,8 +86,22 @@ export async function GET() {
         [today]
     );
 
+    const historyResult = await pool.query(
+        `select w.word, attempt, status
+        from game_guesses as gg
+        join words as w
+        on gg.word_id=w.id
+        where gg.session_id=$1 
+        and gg.game_id=$2
+        order by gg.attempt asc`, [sessionId, gameResult.rows[0].id]
+    )
+
+    console.log("History:", historyResult.rows);
+
+
     return Response.json({
         date: today,
         gameId: gameResult.rows[0].id,
+        history: historyResult.rows
     });
 }

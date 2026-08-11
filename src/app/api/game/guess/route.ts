@@ -14,6 +14,8 @@ export async function POST(request) {
 
     let calculatedStatus;
 
+    console.log("GUESS REQUEST:", { wordGuess, gameId, sessionId });
+
     const sessionExists = await pool.query(`
         select id 
         from sessions
