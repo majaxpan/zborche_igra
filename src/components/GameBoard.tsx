@@ -17,32 +17,25 @@ export default function GameBoard({
   );
 
   useEffect(() => {
-    console.log("invalid attempt:", invalidSubmitAttempt);
-    setIsShaking(true);
+    colors.forEach((row, rowIndex) => {
+      row.forEach((color, tileIndex) => {
+        if (!color) return;
 
-    setTimeout(() => {
-      setIsShaking(false);
-    }, 500);
-  }, [invalidSubmitAttempt]);
+        setTimeout(
+          () => {
+            setRevealedTiles((prev) => {
+              const tile = `${rowIndex}-${tileIndex}`;
 
-  useEffect(() => {
-    const submittedRow = colors.findLastIndex((row) =>
-      row.some((color) => color !== ""),
-    );
+              if (prev.includes(tile)) {
+                return prev;
+              }
 
-    if (submittedRow === -1) {
-      return;
-    }
-
-    colors[submittedRow].forEach((color, tileIndex) => {
-      if (!color) return;
-
-      setTimeout(
-        () => {
-          setRevealedTiles((prev) => [...prev, `${submittedRow}-${tileIndex}`]);
-        },
-        tileIndex * 150 + 300,
-      );
+              return [...prev, tile];
+            });
+          },
+          tileIndex * 150 + 300,
+        );
+      });
     });
   }, [colors]);
 

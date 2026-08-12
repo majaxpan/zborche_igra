@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 //import { isSaneGuess } from "@/utils/wordValidator";
 
@@ -169,57 +169,6 @@ export function useZborcheGame() {
     }
   }
 
-  const gameState = {
-    board: board,
-    colors: colors,
-    keyboardColors: keyboardColors,
-    currentRow: currentRow,
-    currentColumn: currentColumn,
-    gameStatus: gameStatus,
-    date: new Date().toDateString(),
-  };
-
-  const hasLoaded = useRef(false);
-
-  function saveGameState() {
-    //let newGameState = JSON.stringify(gameState);
-    //localStorage.setItem("zborche-game", newGameState);
-
-    //localStorage.setItem("zborche-game", JSON.stringify(gameState));
-
-    if (hasLoaded.current) {
-      localStorage.setItem("zborche-game", JSON.stringify(gameState));
-    }
-  }
-
-  function loadGameState() {
-    const savedGame = localStorage.getItem("zborche-game");
-
-    if (savedGame !== null) {
-      const parsedGame = JSON.parse(savedGame);
-      const today = new Date().toDateString();
-
-      if (parsedGame.date === today) {
-        //restore
-        setBoard(parsedGame.board);
-        setColors(parsedGame.colors);
-        setKeyboardColors(parsedGame.keyboardColors);
-        setCurrentRow(parsedGame.currentRow);
-        setCurrentColumn(parsedGame.currentColumn);
-        setGameStatus(parsedGame.gameStatus);
-      }
-    }
-  }
-
-  useEffect(() => {
-    saveGameState();
-  }, [board, colors, keyboardColors, currentRow, currentColumn, gameStatus]);
-
-  useEffect(() => {
-    loadGameState();
-    hasLoaded.current = true;
-  }, []);
-
   useEffect(() => {
     async function loadTodayGame() {
       const response = await fetch("/api/game/today");
@@ -236,13 +185,60 @@ export function useZborcheGame() {
         ["", "", "", "", ""],
       ];
 
+      const newColors = [
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+      ];
+
+      const newKeyboardColors = {};
+
       data.history.forEach((historyEntry) => {
         const rowIndex = historyEntry.attempt - 1;
 
         newBoard[rowIndex] = historyEntry.word.split("");
+        newColors[rowIndex] = historyEntry.colors;
+
+        for (let i = 0; i < WORD_LENGTH; i++) {
+          const letter = historyEntry.word[i];
+          const newColor = historyEntry.colors[i];
+
+          const existingColor = newKeyboardColors[letter];
+
+          if (existingColor === "GREEN") {
+            continue;
+          }
+
+          if (existingColor === "YELLOW" && newColor === "GRAY") {
+            continue;
+          }
+
+          newKeyboardColors[letter] = newColor;
+        }
       });
 
+      console.log("RECONSTRUCTED BOARD:", newBoard);
+      console.log("RECONSTRUCTED COLORS:", newColors);
+
       setBoard(newBoard);
+      setColors(newColors);
+      setCurrentRow(data.history.length);
+
+      const lastHistoryEntry = data.history[data.history.length - 1];
+
+      if (lastHistoryEntry) {
+        setGameStatus(
+          lastHistoryEntry.status === "WON"
+            ? "WON"
+            : lastHistoryEntry.status === "LOST"
+              ? "LOST"
+              : "PLAYING",
+        );
+      }
+      console.log("STATE COLORS:", colors);
 
       setGameId(data.gameId);
       setGameReady(true);
@@ -250,6 +246,10 @@ export function useZborcheGame() {
 
     loadTodayGame();
   }, []);
+
+  useEffect(() => {
+    console.log("COLORS STATE CHANGED:", colors);
+  }, [colors]);
 
   return {
     board,

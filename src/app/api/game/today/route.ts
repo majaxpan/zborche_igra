@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { checkWord } from "@/lib/gameLogic";
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 
@@ -96,12 +97,32 @@ export async function GET() {
         order by gg.attempt asc`, [sessionId, gameResult.rows[0].id]
     )
 
-    console.log("History:", historyResult.rows);
+    //console.log("History:", historyResult.rows);
 
+    const secretWordResult = await pool.query(
+        `SELECT dg.word_id, w.word
+        FROM daily_games AS dg
+        JOIN words AS w
+        ON w.id = dg.word_id
+        WHERE dg.id = $1`, [gameResult.rows[0].id]
+    )
+
+    const secretWord = secretWordResult.rows[0].word;
+
+    const historyWithColors = historyResult.rows.map((guess) => {
+        const colors = checkWord(guess.word, secretWord);
+
+        return {
+            ...guess,
+            colors: colors,
+        };
+    });
+
+    console.log("History:", historyWithColors);
 
     return Response.json({
         date: today,
         gameId: gameResult.rows[0].id,
-        history: historyResult.rows
+        history: historyWithColors,
     });
 }
