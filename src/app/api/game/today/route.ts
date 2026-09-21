@@ -13,7 +13,7 @@ export async function GET() {
 
     const sessionExists = await checkSession(sessionId);
 
-    if (!sessionExists){
+    if (!sessionExists) {
         sessionId = await createSession();
         cookieStore.set("sessionId", sessionId);
     }
@@ -42,6 +42,17 @@ export async function GET() {
     });
 
     console.log("History:", historyWithColors);
+
+    const lastHistoryEntry = history[history.length - 1];
+
+    if (lastHistoryEntry?.status === "LOST") {
+        return Response.json({
+            date: today,
+            gameId: gameId,
+            history: historyWithColors,
+            secretWord: secretWord,
+        });
+    }
 
     return Response.json({
         date: today,

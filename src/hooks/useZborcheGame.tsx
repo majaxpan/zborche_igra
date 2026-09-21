@@ -230,6 +230,10 @@ export function useZborcheGame() {
 
       const lastHistoryEntry = data.history[data.history.length - 1];
 
+      if (lastHistoryEntry?.status === "LOST") {
+        setSecretWord(data.secretWord);
+      }
+
       if (lastHistoryEntry) {
         setGameStatus(
           lastHistoryEntry.status === "WON"
