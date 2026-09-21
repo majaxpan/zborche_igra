@@ -1,115 +1,38 @@
 import { pool } from "@/lib/db";
 import { checkWord } from "@/lib/gameLogic";
-import { randomUUID } from "crypto";
+import { checkSession, createSession } from "@/lib/sessions";
 import { cookies } from "next/headers";
+import { getDailyGameId } from "@/lib/dailyGame";
+import { getGameHistory } from "@/lib/gameHistory";
 
 export async function GET() {
     const today = new Date().toISOString().slice(0, 10);
 
     const cookieStore = await cookies();
-    const sessionId = cookieStore.get("sessionId")?.value;
+    let sessionId = cookieStore.get("sessionId")?.value;
 
-    const sessionExists = await pool.query(`
-        select id 
-        from sessions
-        where id=$1
-        `, [sessionId])
+    const sessionExists = await checkSession(sessionId);
 
-    if (sessionId && sessionExists.rows.length > 0) {
-        await pool.query(`
-            update sessions
-            set last_seen_at= now()
-            where id=$1
-            `, [sessionId])
-    }
-    else {
-        const newSessionId = randomUUID();
-        cookieStore.set("sessionId", newSessionId);
-
-        await pool.query(`
-            insert into sessions(id)
-            values($1)
-            `, [newSessionId])
+    if (!sessionExists){
+        sessionId = await createSession();
+        cookieStore.set("sessionId", sessionId);
     }
 
-    const result = await pool.query(
-        `SELECT id
-        FROM daily_games
-        WHERE date = $1`, [today]
-    )
+    const gameId = await getDailyGameId(today);
 
-    if (result.rows.length === 0) {
-        let wordId;
-
-        const wordResult = await pool.query(
-            `select w.id
-            from words as w
-            left join daily_games as dg
-            on w.id = dg.word_id
-            where dg.id is null 
-            and w.daily_eligible=true
-            order by random()
-            limit 1`,
-        )
-
-        if (wordResult.rows.length === 0) {
-            const fallbackWordResult = await pool.query(
-                `select w.id
-                from words as w
-                join daily_games as dg
-                on w.id = dg.word_id
-                where w.daily_eligible=true
-                order by random()
-                limit 1
-                `
-            )
-
-            wordId = fallbackWordResult.rows[0].id
-
-        } else {
-            wordId = wordResult.rows[0].id
-        }
-
-        const gameresult = await pool.query(
-            `
-            insert into daily_games (date, word_id)
-            values($1,$2)
-            `, [today, wordId]
-        );
-
-        console.log(gameresult);
-    }
-
-    const gameResult = await pool.query(
-        `SELECT id
-     FROM daily_games
-     WHERE date = $1`,
-        [today]
-    );
-
-    const historyResult = await pool.query(
-        `select w.word, attempt, status
-        from game_guesses as gg
-        join words as w
-        on gg.word_id=w.id
-        where gg.session_id=$1 
-        and gg.game_id=$2
-        order by gg.attempt asc`, [sessionId, gameResult.rows[0].id]
-    )
-
-    //console.log("History:", historyResult.rows);
+    const history = await getGameHistory(sessionId, gameId);
 
     const secretWordResult = await pool.query(
         `SELECT dg.word_id, w.word
         FROM daily_games AS dg
         JOIN words AS w
         ON w.id = dg.word_id
-        WHERE dg.id = $1`, [gameResult.rows[0].id]
+        WHERE dg.id = $1`, [gameId]
     )
 
     const secretWord = secretWordResult.rows[0].word;
 
-    const historyWithColors = historyResult.rows.map((guess) => {
+    const historyWithColors = history.map((guess) => {
         const colors = checkWord(guess.word, secretWord);
 
         return {
@@ -122,7 +45,7 @@ export async function GET() {
 
     return Response.json({
         date: today,
-        gameId: gameResult.rows[0].id,
+        gameId: gameId,
         history: historyWithColors,
     });
 }

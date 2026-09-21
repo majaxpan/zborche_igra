@@ -226,6 +226,7 @@ export function useZborcheGame() {
       setBoard(newBoard);
       setColors(newColors);
       setCurrentRow(data.history.length);
+      setKeyboardColors(newKeyboardColors);
 
       const lastHistoryEntry = data.history[data.history.length - 1];
 
