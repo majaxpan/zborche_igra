@@ -1,0 +1,5 @@
+CREATE TABLE words (
+    id SERIAL PRIMARY KEY,
+    word VARCHAR(5) NOT NULL UNIQUE,
+    daily_eligible BOOLEAN NOT NULL DEFAULT true
+);
