@@ -15,7 +15,9 @@ export async function GET() {
 
     if (!sessionExists) {
         sessionId = await createSession();
-        cookieStore.set("sessionId", sessionId);
+        cookieStore.set("sessionId", sessionId, {
+            maxAge: 60 * 60 * 24 * 365,
+        });
     }
 
     const gameId = await getDailyGameId(today);

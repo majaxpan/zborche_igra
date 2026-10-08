@@ -115,6 +115,11 @@ export function useZborcheGame() {
       return;
     }
 
+    if (data.result === "INVALID_SESSION") {
+      loadTodayGame();
+      return;
+    }
+
     if (data.result === "CORRECT") {
       setGameStatus("WON");
     } else if (data.result === "LOST") {
@@ -169,86 +174,86 @@ export function useZborcheGame() {
     }
   }
 
-  useEffect(() => {
-    async function loadTodayGame() {
-      const response = await fetch("/api/game/today");
-      const data = await response.json();
+  async function loadTodayGame() {
+    const response = await fetch("/api/game/today");
+    const data = await response.json();
 
-      console.log("Today's game:", data);
+    console.log("Today's game:", data);
 
-      const newBoard = [
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-      ];
+    const newBoard = [
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+    ];
 
-      const newColors = [
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-        ["", "", "", "", ""],
-      ];
+    const newColors = [
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+    ];
 
-      const newKeyboardColors = {};
+    const newKeyboardColors = {};
 
-      data.history.forEach((historyEntry) => {
-        const rowIndex = historyEntry.attempt - 1;
+    data.history.forEach((historyEntry) => {
+      const rowIndex = historyEntry.attempt - 1;
 
-        newBoard[rowIndex] = historyEntry.word.split("");
-        newColors[rowIndex] = historyEntry.colors;
+      newBoard[rowIndex] = historyEntry.word.split("");
+      newColors[rowIndex] = historyEntry.colors;
 
-        for (let i = 0; i < WORD_LENGTH; i++) {
-          const letter = historyEntry.word[i];
-          const newColor = historyEntry.colors[i];
+      for (let i = 0; i < WORD_LENGTH; i++) {
+        const letter = historyEntry.word[i];
+        const newColor = historyEntry.colors[i];
 
-          const existingColor = newKeyboardColors[letter];
+        const existingColor = newKeyboardColors[letter];
 
-          if (existingColor === "GREEN") {
-            continue;
-          }
-
-          if (existingColor === "YELLOW" && newColor === "GRAY") {
-            continue;
-          }
-
-          newKeyboardColors[letter] = newColor;
+        if (existingColor === "GREEN") {
+          continue;
         }
-      });
 
-      console.log("RECONSTRUCTED BOARD:", newBoard);
-      console.log("RECONSTRUCTED COLORS:", newColors);
+        if (existingColor === "YELLOW" && newColor === "GRAY") {
+          continue;
+        }
 
-      setBoard(newBoard);
-      setColors(newColors);
-      setCurrentRow(data.history.length);
-      setKeyboardColors(newKeyboardColors);
-
-      const lastHistoryEntry = data.history[data.history.length - 1];
-
-      if (lastHistoryEntry?.status === "LOST") {
-        setSecretWord(data.secretWord);
+        newKeyboardColors[letter] = newColor;
       }
+    });
 
-      if (lastHistoryEntry) {
-        setGameStatus(
-          lastHistoryEntry.status === "WON"
-            ? "WON"
-            : lastHistoryEntry.status === "LOST"
-              ? "LOST"
-              : "PLAYING",
-        );
-      }
-      console.log("STATE COLORS:", colors);
+    console.log("RECONSTRUCTED BOARD:", newBoard);
+    console.log("RECONSTRUCTED COLORS:", newColors);
 
-      setGameId(data.gameId);
-      setGameReady(true);
+    setBoard(newBoard);
+    setColors(newColors);
+    setCurrentRow(data.history.length);
+    setKeyboardColors(newKeyboardColors);
+
+    const lastHistoryEntry = data.history[data.history.length - 1];
+
+    if (lastHistoryEntry?.status === "LOST") {
+      setSecretWord(data.secretWord);
     }
 
+    if (lastHistoryEntry) {
+      setGameStatus(
+        lastHistoryEntry.status === "WON"
+          ? "WON"
+          : lastHistoryEntry.status === "LOST"
+            ? "LOST"
+            : "PLAYING",
+      );
+    }
+    console.log("STATE COLORS:", colors);
+
+    setGameId(data.gameId);
+    setGameReady(true);
+  }
+
+  useEffect(() => {
     loadTodayGame();
   }, []);
 

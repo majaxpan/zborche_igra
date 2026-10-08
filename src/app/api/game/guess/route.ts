@@ -6,7 +6,7 @@ import { checkWord } from "@/lib/gameLogic";
 
 export async function POST(request) {
     const body = await request.json();
-    const wordGuess = body.guess;
+    const wordGuess = body.guess.toUpperCase();
     const gameId = body.gameId;
 
     const cookieStore = await cookies();

@@ -39,15 +39,26 @@ export default function GameBoard({
     });
   }, [colors]);
 
+  useEffect(() => {
+    if (invalidSubmitAttempt === 0) return;
+
+    setIsShaking(true);
+
+    const timer = setTimeout(() => {
+      setIsShaking(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [invalidSubmitAttempt]);
+
   return (
     <div>
       <div className="flex flex-col gap-2 sm:gap-2 md:gap-3 lg:gap-4">
         {board.map((boardRow, rowIndex) => (
           <div
             key={rowIndex}
-            className={`flex gap-2 sm:gap-2 md:gap-3 lg:gap-4 ${
-              rowIndex === row && isShaking ? "shake" : ""
-            }`}
+            className={`flex gap-2 sm:gap-2 md:gap-3 lg:gap-4 ${rowIndex === row && isShaking ? "shake" : ""
+              }`}
           >
             {boardRow.map((tile, tileIndex) => {
               const color = colors[rowIndex][tileIndex];
@@ -63,10 +74,9 @@ export default function GameBoard({
                     text-10 text-m md:text-xl lg:text-2xl
                     border border-gray-400
                     flex items-center justify-center
-                    ${
-                      revealedTiles.includes(`${rowIndex}-${tileIndex}`)
-                        ? getColor(color)
-                        : "bg-white"
+                    ${revealedTiles.includes(`${rowIndex}-${tileIndex}`)
+                      ? getColor(color)
+                      : "bg-white"
                     }
                     ${color ? "flip" : ""}
                   `}

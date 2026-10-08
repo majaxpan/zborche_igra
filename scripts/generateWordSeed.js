@@ -12,7 +12,7 @@ console.log("Unique:", [...new Set(words)].length);
 const uniqueWords = [...new Set(words)];
 
 const sqlValues = uniqueWords
-    .map(word => `('${word}', true)`)
+    .map(word => `('${word.toUpperCase()}', true)`)
     .join(",\n");
 
 const sql = `
