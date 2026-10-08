@@ -8,9 +8,15 @@ export default function GameBoard({
   row,
   tile,
   invalidSubmitAttempt,
+}: {
+  board: string[][];
+  colors: string[][];
+  row: number;
+  tile: number;
+  invalidSubmitAttempt: number;
 }) {
   const [isShaking, setIsShaking] = useState(false);
-  const [revealedTiles, setRevealedTiles] = useState([]);
+  const [revealedTiles, setRevealedTiles] = useState<string[]>([]);
 
   const submittedRow = colors.findLastIndex((row) =>
     row.some((color) => color !== ""),

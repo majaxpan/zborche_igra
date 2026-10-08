@@ -45,7 +45,7 @@ export function useZborcheGame() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
   }
 
-  function addLetter(letter) {
+  function addLetter(letter: string) {
     if (currentColumn > LAST_LETTER_INDEX) {
       return;
     }
@@ -129,7 +129,7 @@ export function useZborcheGame() {
 
     const resultColors = data.colors;
 
-    const newKeyboardColors = { ...keyboardColors };
+    const newKeyboardColors: Record<string, string> = { ...keyboardColors };
 
     for (let i = 0; i < WORD_LENGTH; i++) {
       const existingColor = newKeyboardColors[currentWord[i]];
@@ -161,7 +161,7 @@ export function useZborcheGame() {
     }
   }
 
-  function handleKeyPress(letter) {
+  function handleKeyPress(letter: string) {
     if (gameStatus !== "PLAYING") {
       return;
     }
@@ -198,9 +198,14 @@ export function useZborcheGame() {
       ["", "", "", "", ""],
     ];
 
-    const newKeyboardColors = {};
+    const newKeyboardColors: Record<string, string> = {};
 
-    data.history.forEach((historyEntry) => {
+    data.history.forEach((historyEntry: {
+      attempt: number;
+      word: string;
+      colors: string[];
+      status: string;
+    }) => {
       const rowIndex = historyEntry.attempt - 1;
 
       newBoard[rowIndex] = historyEntry.word.split("");

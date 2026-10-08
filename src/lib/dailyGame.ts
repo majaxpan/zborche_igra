@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db";
 
-export async function getDailyGameId(today) {
+export async function getDailyGameId(today: string) {
 
     const gameExists = await pool.query(
             `SELECT id

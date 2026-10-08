@@ -2,7 +2,13 @@
 
 import { getColor } from "@/utils/getColor";
 
-export default function Keyboard({ keyboardColors, onKeyPress }) {
+export default function Keyboard({
+  keyboardColors,
+  onKeyPress,
+}: {
+  keyboardColors: Record<string, string>;
+  onKeyPress: (letter: string) => void;
+}) {
   const macedonianKeyboard = [
     ["Љ", "Њ", "Е", "Р", "Т", "Ѕ", "У", "И", "О", "П", "Ш"],
     ["А", "С", "Д", "Ф", "Г", "Х", "Ј", "К", "Л", "Ч", "Ќ"],

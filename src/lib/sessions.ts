@@ -1,7 +1,7 @@
 import { pool } from "@/lib/db";
 import { randomUUID } from "crypto";
 
-export async function checkSession(sessionId) {
+export async function checkSession(sessionId: string | undefined) {
     const sessionExists = await pool.query(`
             select id 
             from sessions

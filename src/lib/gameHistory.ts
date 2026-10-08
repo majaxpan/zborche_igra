@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db";
 
-export async function getGameHistory(sessionId, gameId) {
+export async function getGameHistory(sessionId: string, gameId: number) {
     const historyResult = await pool.query(
         `select w.word, attempt, status
             from game_guesses as gg

@@ -1,4 +1,4 @@
-export function checkWord(currentWord, secretWord) {
+export function checkWord(currentWord: string, secretWord: string) {
   const used = Array(secretWord.length).fill(false);
   const rowColors = Array(secretWord.length).fill("GRAY");
 

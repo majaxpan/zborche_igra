@@ -22,7 +22,7 @@ export async function GET() {
 
     const gameId = await getDailyGameId(today);
 
-    const history = await getGameHistory(sessionId, gameId);
+    const history = await getGameHistory(sessionId!, gameId);
 
     const secretWordResult = await pool.query(
         `SELECT dg.word_id, w.word
@@ -34,7 +34,7 @@ export async function GET() {
 
     const secretWord = secretWordResult.rows[0].word;
 
-    const historyWithColors = history.map((guess) => {
+    const historyWithColors = history.map((guess: { word: string; attempt: number; status: string }) => {
         const colors = checkWord(guess.word, secretWord);
 
         return {

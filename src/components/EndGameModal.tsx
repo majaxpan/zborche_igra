@@ -5,6 +5,11 @@ export default function EndGameModal({
   secretWord,
   isOpen,
   setIsOpen,
+}: {
+  gameStatus: string;
+  secretWord: string | null;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   if (gameStatus === "PLAYING" || !isOpen) {
     return null;

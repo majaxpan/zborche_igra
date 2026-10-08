@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { checkWord } from "@/lib/gameLogic";
 
 
-export async function POST(request) {
+export async function POST(request: Request) {
     const body = await request.json();
     const wordGuess = body.guess.toUpperCase();
     const gameId = body.gameId;
