@@ -41,6 +41,8 @@ export function useZborcheGame() {
   const [gameId, setGameId] = useState(null);
   const [gameReady, setGameReady] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   function updatePosition() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
   }
@@ -75,89 +77,100 @@ export function useZborcheGame() {
     setCurrentColumn(newColumn);
   }
 
+
   async function submitWord() {
-    if (!gameReady || gameId === null) {
+    console.log("submitWord called", {
+      isSubmitting,
+      currentRow,
+      currentColumn,
+      gameStatus,
+    });
+
+    if (!gameReady || gameId === null || isSubmitting) {
+      console.log("Submission blocked");
       return;
     }
 
     const hasEmptyTile = board[currentRow].some((letter) => letter === "");
     const currentWord = board[currentRow].join("");
 
-    // if (hasEmptyTile || !isSaneGuess(currentWord)) {
-    //   setInvalidSubmitAttempt((prev) => prev + 1);
-    //   return;
-    // }
-
     if (hasEmptyTile) {
+      console.log("Empty row detected", { currentRow, currentWord });
       setInvalidSubmitAttempt((prev) => prev + 1);
       return;
     }
 
-    const response = await fetch("/api/game/guess", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        guess: currentWord,
-        gameId,
-      }),
-    });
+    setIsSubmitting(true);
 
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/game/guess", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          guess: currentWord,
+          gameId,
+        }),
+      });
 
-    console.log("GUESS RESPONSE:", data);
+      const data = await response.json();
 
-    console.log("History:", data.history);
+      console.log("GUESS RESPONSE:", data);
+      console.log("History:", data.history);
 
-    if (data.result === "INVALID_WORD") {
-      setInvalidSubmitAttempt((prev) => prev + 1);
-      return;
-    }
-
-    if (data.result === "INVALID_SESSION") {
-      loadTodayGame();
-      return;
-    }
-
-    if (data.result === "CORRECT") {
-      setGameStatus("WON");
-    } else if (data.result === "LOST") {
-      setSecretWord(data.secretWord);
-      setGameStatus("LOST");
-    }
-
-    const resultColors = data.colors;
-
-    const newKeyboardColors: Record<string, string> = { ...keyboardColors };
-
-    for (let i = 0; i < WORD_LENGTH; i++) {
-      const existingColor = newKeyboardColors[currentWord[i]];
-      const newColor = resultColors[i];
-
-      if (existingColor === "GREEN") {
-        continue;
+      if (data.result === "INVALID_WORD") {
+        setInvalidSubmitAttempt((prev) => prev + 1);
+        return;
       }
 
-      if (existingColor === "YELLOW" && newColor === "GRAY") {
-        continue;
+      if (data.result === "INVALID_SESSION") {
+        loadTodayGame();
+        return;
       }
 
-      newKeyboardColors[currentWord[i]] = newColor;
-    }
-    setKeyboardColors(newKeyboardColors);
+      if (data.result === "CORRECT") {
+        setGameStatus("WON");
+      } else if (data.result === "LOST") {
+        setSecretWord(data.secretWord);
+        setGameStatus("LOST");
+      }
 
-    const newColors = colors.map((row) => {
-      return [...row];
-    });
+      const resultColors = data.colors;
+      const newKeyboardColors: Record<string, string> = {
+        ...keyboardColors,
+      };
 
-    newColors[currentRow] = resultColors;
+      for (let i = 0; i < WORD_LENGTH; i++) {
+        const existingColor = newKeyboardColors[currentWord[i]];
+        const newColor = resultColors[i];
 
-    setColors(newColors);
+        if (existingColor === "GREEN") {
+          continue;
+        }
 
-    if (data.result === "INCORRECT") {
-      setCurrentRow((prev) => prev + 1);
-      setCurrentColumn(0);
+        if (existingColor === "YELLOW" && newColor === "GRAY") {
+          continue;
+        }
+
+        newKeyboardColors[currentWord[i]] = newColor;
+      }
+
+      setKeyboardColors(newKeyboardColors);
+
+      const newColors = colors.map((row) => [...row]);
+      newColors[currentRow] = resultColors;
+      setColors(newColors);
+
+      if (data.result === "INCORRECT") {
+        setCurrentRow((prev) => prev + 1);
+        setCurrentColumn(0);
+      }
+    } catch (error) {
+      console.error("Guess submission failed:", error);
+    } finally {
+      console.log("Submission lock released");
+      setIsSubmitting(false);
     }
   }
 
@@ -165,9 +178,20 @@ export function useZborcheGame() {
     if (gameStatus !== "PLAYING") {
       return;
     }
+
     if (letter === "⌫") {
       removeLetter();
     } else if (letter === "⏎") {
+      if (currentColumn === 0) {
+        return;
+      }
+      console.log("Enter pressed", {
+        isSubmitting,
+        currentRow,
+        currentColumn,
+        gameStatus,
+      });
+
       submitWord();
     } else {
       addLetter(letter);
