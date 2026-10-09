@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 //import { isSaneGuess } from "@/utils/wordValidator";
 
@@ -42,6 +42,7 @@ export function useZborcheGame() {
   const [gameReady, setGameReady] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submissionLock = useRef(false);
 
   function updatePosition() {
     setCurrentColumn((prev) => Math.min(prev + 1, WORD_LENGTH));
@@ -79,15 +80,7 @@ export function useZborcheGame() {
 
 
   async function submitWord() {
-    console.log("submitWord called", {
-      isSubmitting,
-      currentRow,
-      currentColumn,
-      gameStatus,
-    });
-
-    if (!gameReady || gameId === null || isSubmitting) {
-      console.log("Submission blocked");
+    if (!gameReady || gameId === null || submissionLock.current) {
       return;
     }
 
@@ -95,12 +88,12 @@ export function useZborcheGame() {
     const currentWord = board[currentRow].join("");
 
     if (hasEmptyTile) {
-      console.log("Empty row detected", { currentRow, currentWord });
       setInvalidSubmitAttempt((prev) => prev + 1);
       return;
     }
 
     setIsSubmitting(true);
+    submissionLock.current = true;
 
     try {
       const response = await fetch("/api/game/guess", {
@@ -115,9 +108,6 @@ export function useZborcheGame() {
       });
 
       const data = await response.json();
-
-      console.log("GUESS RESPONSE:", data);
-      console.log("History:", data.history);
 
       if (data.result === "INVALID_WORD") {
         setInvalidSubmitAttempt((prev) => prev + 1);
@@ -169,8 +159,8 @@ export function useZborcheGame() {
     } catch (error) {
       console.error("Guess submission failed:", error);
     } finally {
-      console.log("Submission lock released");
       setIsSubmitting(false);
+      submissionLock.current = false;
     }
   }
 
@@ -185,13 +175,6 @@ export function useZborcheGame() {
       if (currentColumn === 0) {
         return;
       }
-      console.log("Enter pressed", {
-        isSubmitting,
-        currentRow,
-        currentColumn,
-        gameStatus,
-      });
-
       submitWord();
     } else {
       addLetter(letter);
